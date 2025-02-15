@@ -1,24 +1,29 @@
 const std = @import("std");
 
-pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+// Create a world struct that will act as a simplified ECS, that handles the following
+// run game logic in seperate schedules
+// Update,
+// Draw,
+// Cleanup
+//
+// Global references (asset handles, singleton objects)
+// Entities
+// try out an interface to implement for objects that share common behavior (like with the `drawer` interface), and then a comptime function to reproduce that pattern for new object types
+// these types will define what they do in their (update, draw, cleanup) steps
+//
+//
+//
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+pub fn main() !void {}
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+test "decl test" {
+    const MyType = struct {
+        pub fn do_nothing() void {}
+    };
 
-    try bw.flush(); // don't forget to flush!
-}
+    const expect = @import("std").testing.expect;
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+    const typeInfo = @typeInfo(MyType);
+
+    try expect(std.mem.eql(u8, typeInfo.Struct.decls[0].name, "do_nothing"));
 }
