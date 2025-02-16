@@ -64,7 +64,7 @@ pub fn build(b: *std.Build) void {
     run_step.dependOn(&run_cmd.step);
 
     const exe_unit_tests = b.addTest(.{
-        .root_source_file = b.path("src/main.zig"),
+        .root_source_file = b.path("src/test.zig"),
         .test_runner = b.path("src/test_runner.zig"),
         .target = target,
         .optimize = optimize,
