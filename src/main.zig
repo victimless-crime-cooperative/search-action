@@ -20,12 +20,27 @@ pub fn main() !void {
     const screen_width = 1600;
     const screen_height = 900;
 
+    rl.setConfigFlags(.{ .window_resizable = true });
     rl.initWindow(screen_width, screen_height, "search action");
     defer rl.closeWindow();
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    const allocator = gpa.allocator();
+
+    const world = try core.World.setup(allocator);
 
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
         defer rl.endDrawing();
+        // Clear color
+        rl.clearBackground(rl.Color.ray_white);
+
+        //3D Draw Step
+        world.start_3d();
+        rl.drawGrid(10, 1);
+
+        world.end_3d();
+        //UI Draw Step
     }
 }
 
