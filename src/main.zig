@@ -1,6 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
 const core = @import("core.zig");
+const env = @import("environment.zig");
 const physics = @import("physics.zig");
 const rendering = @import("rendering.zig");
 
@@ -35,6 +36,22 @@ pub fn main() !void {
     const world = try core.World.init(allocator);
     defer world.deinit(allocator);
 
+    var renderer = rendering.Renderer.init(allocator);
+    defer renderer.deinit();
+
+    var a = env.Block.new(0, -2, 0, handles.road);
+    var b = env.Block.new(0, -2, 2, handles.road);
+    var c = env.Block.new(0, -2, -2, handles.road);
+    var d = env.Block.new(1, -2, 4, handles.road);
+    var e = env.Block.new(-1, -2, -4, handles.road);
+
+    // Add the draw objects for our blocks to the renderer
+    try renderer.append(a.draw_object());
+    try renderer.append(b.draw_object());
+    try renderer.append(c.draw_object());
+    try renderer.append(d.draw_object());
+    try renderer.append(e.draw_object());
+
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -44,8 +61,9 @@ pub fn main() !void {
         //3D Draw Step
         world.start_3d();
         rl.drawGrid(10, 1);
-        rl.drawModel(handles.player_model.*, .{ .x = 0, .y = 0, .z = 0 }, 1, rl.Color.white);
-        rl.drawModel(handles.player_model.*, .{ .x = 2, .y = 0, .z = 0 }, 1, rl.Color.white);
+        rl.drawModel(handles.player.*, .{ .x = 0, .y = 0, .z = 0 }, 1, rl.Color.white);
+        // rl.drawModel(handles.road.*, .{ .x = 0, .y = -2, .z = 0 }, 1, rl.Color.white);
+        renderer.draw();
 
         world.end_3d();
         //UI Draw Step

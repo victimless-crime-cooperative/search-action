@@ -2,17 +2,20 @@ const std = @import("std");
 const rl = @import("raylib");
 
 pub const ModelHandles = struct {
-    player_model: *rl.Model,
+    player: *rl.Model,
+    road: *rl.Model,
 
     const Self = @This();
 
     pub fn init(allocator: std.mem.Allocator) !Self {
-        const player_model = try Self.loadModel(allocator, "./assets/models/cheffy.glb");
-        return .{ .player_model = player_model };
+        const player = try Self.loadModel(allocator, "./assets/models/cheffy.glb");
+        const road = try Self.loadModel(allocator, "./assets/models/road.glb");
+        return .{ .player = player, .road = road };
     }
 
     pub fn deinit(self: Self, allocator: std.mem.Allocator) void {
-        allocator.destroy(self.player_model);
+        allocator.destroy(self.player);
+        allocator.destroy(self.road);
     }
 
     fn loadModel(allocator: std.mem.Allocator, path: [*:0]const u8) !*rl.Model {
@@ -20,5 +23,41 @@ pub const ModelHandles = struct {
         const model = try allocator.create(rl.Model);
         model.* = raw_model;
         return model;
+    }
+};
+
+pub const Renderer = struct {
+    renderable_objects: std.ArrayList(DrawObject),
+
+    const Self = @This();
+
+    pub fn init(allocator: std.mem.Allocator) Self {
+        const renderable_objects = std.ArrayList(DrawObject).init(allocator);
+        return Self{ .renderable_objects = renderable_objects };
+    }
+
+    pub fn deinit(self: Self) void {
+        self.renderable_objects.deinit();
+    }
+
+    pub fn append(self: *Self, draw_object: DrawObject) !void {
+        try self.renderable_objects.append(draw_object);
+    }
+
+    pub fn draw(self: Self) void {
+        for (self.renderable_objects.items) |ro| {
+            ro.draw();
+        }
+    }
+};
+
+pub const DrawObject = struct {
+    ptr: *anyopaque,
+    drawFn: *const fn (ptr: *anyopaque) void,
+
+    const Self = @This();
+
+    fn draw(self: Self) void {
+        return self.drawFn(self.ptr);
     }
 };
