@@ -1,6 +1,8 @@
 const std = @import("std");
 const rl = @import("raylib");
 const core = @import("core.zig");
+const physics = @import("physics.zig");
+const rendering = @import("rendering.zig");
 
 // Create a world struct that will act as a simplified ECS, that handles the following
 // run game logic in seperate schedules
@@ -27,7 +29,11 @@ pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
 
-    const world = try core.World.setup(allocator);
+    const handles = try rendering.ModelHandles.init(allocator);
+    defer handles.deinit(allocator);
+
+    const world = try core.World.init(allocator);
+    defer world.deinit(allocator);
 
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
@@ -38,24 +44,12 @@ pub fn main() !void {
         //3D Draw Step
         world.start_3d();
         rl.drawGrid(10, 1);
+        rl.drawModel(handles.player_model.*, .{ .x = 0, .y = 0, .z = 0 }, 1, rl.Color.white);
+        rl.drawModel(handles.player_model.*, .{ .x = 2, .y = 0, .z = 0 }, 1, rl.Color.white);
 
         world.end_3d();
         //UI Draw Step
     }
-}
-
-// The results of this test is just me reailizing how powerful zigs type system is
-// This will allow making DrawObject, UpdateObject, and CleanupObjects for any type we need to with less boilerplate, since you can inspect and interact with type declarations, we can essentially add the fields/methods unique to an object and then insert engine necessary stuff (position, visibility, velocity, mesh)
-test "decl test" {
-    const MyType = struct {
-        pub fn do_nothing() void {}
-    };
-
-    const expect = @import("std").testing.expect;
-
-    const typeInfo = @typeInfo(MyType);
-
-    try expect(std.mem.eql(u8, typeInfo.Struct.decls[0].name, "do_nothing"));
 }
 
 //Realizing now that we can use multi array strings to handle extracted struct data for some mini-ecs stuff (physical object can be generated from an interface method, output uniform structs for velocity, position, etc, amd update them from while crawling the multi array list, giving us cache-locality and a more ecs like flow, can also include a state machine struct as well to, simmilar to how I'm handling state in bevy, but a little better in this case because we switch on the [state] of the object instead of querying for the state and checking
