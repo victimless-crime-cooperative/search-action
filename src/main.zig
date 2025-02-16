@@ -1,4 +1,6 @@
 const std = @import("std");
+const rl = @import("raylib");
+const core = @import("core.zig");
 
 // Create a world struct that will act as a simplified ECS, that handles the following
 // run game logic in seperate schedules
@@ -14,7 +16,18 @@ const std = @import("std");
 //
 //
 
-pub fn main() !void {}
+pub fn main() !void {
+    const screen_width = 1600;
+    const screen_height = 900;
+
+    rl.initWindow(screen_width, screen_height, "search action");
+    defer rl.closeWindow();
+
+    while (!rl.windowShouldClose()) {
+        rl.beginDrawing();
+        defer rl.endDrawing();
+    }
+}
 
 // The results of this test is just me reailizing how powerful zigs type system is
 // This will allow making DrawObject, UpdateObject, and CleanupObjects for any type we need to with less boilerplate, since you can inspect and interact with type declarations, we can essentially add the fields/methods unique to an object and then insert engine necessary stuff (position, visibility, velocity, mesh)
