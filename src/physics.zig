@@ -99,11 +99,3 @@ pub fn particle_sim() !void {
         current_time += 1;
     }
 }
-
-// pub fn (rand: std.Random) void {
-//     for (0..particle_count) |i| {
-//         particles[i].position = .{ .x = rand.float(f32) * 10, .y = rand.float(f32) * 10, .z = rand.float(f32) * 10 };
-//         particles[i].velocity = .{ .x = 0, .y = 0, .z = 0 };
-//         particles[i].mass = 1;
-//     }
-// }
