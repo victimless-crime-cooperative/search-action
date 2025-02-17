@@ -24,6 +24,9 @@ pub fn main() !void {
     const screen_height = 900;
 
     rl.setConfigFlags(.{ .window_resizable = true });
+
+    try physics.particle_sim();
+
     rl.initWindow(screen_width, screen_height, "search action");
     defer rl.closeWindow();
 
@@ -60,10 +63,12 @@ pub fn main() !void {
 
         //3D Draw Step
         world.start_3d();
-        rl.drawGrid(10, 1);
-        rl.drawModel(handles.player.*, .{ .x = 0, .y = 0, .z = 0 }, 1, rl.Color.white);
-        // rl.drawModel(handles.road.*, .{ .x = 0, .y = -2, .z = 0 }, 1, rl.Color.white);
-        renderer.draw();
+        {
+            rl.drawGrid(10, 1);
+            rl.drawModel(handles.player.*, .{ .x = 0, .y = 0, .z = 0 }, 1, rl.Color.white);
+            // rl.drawModel(handles.road.*, .{ .x = 0, .y = -2, .z = 0 }, 1, rl.Color.white);
+            renderer.draw();
+        }
 
         world.end_3d();
         //UI Draw Step
