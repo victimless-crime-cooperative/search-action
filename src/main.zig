@@ -1,6 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
 const Player = @import("player.zig").Player;
+const World = @import("core.zig").World;
 
 pub fn main() !void {
     const screen_width = 1600;
@@ -13,7 +14,8 @@ pub fn main() !void {
     rl.initWindow(screen_width, screen_height, "search action");
     defer rl.closeWindow();
 
-    const camera = rl.Camera3D{ .position = .{ .x = 0, .y = 10, .z = -10 }, .target = .{ .x = 0, .y = 0, .z = 0 }, .up = .{ .x = 0, .y = 1, .z = 0 }, .fovy = 45, .projection = .perspective };
+    const world = World.init();
+
     var player = Player.init(.{ .x = 0, .y = 2, .z = 0 });
 
     while (!rl.windowShouldClose()) {
@@ -31,21 +33,18 @@ pub fn main() !void {
             velocity.x -= 1;
         }
         if (velocity.x != 0 or velocity.z != 0) {
-            const camera_matrix: rl.Matrix = camera.getMatrix();
-            const inverted_matrix: rl.Matrix = camera_matrix.invert();
-            var transformed_vector = velocity.transform(inverted_matrix).subtract(camera.position);
-            transformed_vector.y = 0;
-            player.move(transformed_vector.normalize());
+            const transformed_velocity = world.interpolate_vector(velocity);
+            player.move(transformed_velocity);
         }
         rl.beginDrawing();
         rl.clearBackground(rl.Color.ray_white);
 
-        camera.begin();
+        world.start_3d();
+        defer world.end_3d();
         {
             rl.drawGrid(10, 1);
             player.draw();
         }
-        camera.end();
 
         rl.endDrawing();
     }

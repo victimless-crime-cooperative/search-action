@@ -15,6 +15,7 @@ pub const World = struct {
         const matrix = self.camera.getMatrix();
         const target_matrix = matrix.invert();
         var new_value = value.transform(target_matrix).subtract(self.camera.position);
+        new_value.y = 0;
         return new_value.normalize();
     }
 
