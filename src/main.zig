@@ -25,31 +25,32 @@ pub fn main() !void {
 
     while (!rl.windowShouldClose()) {
         input(world, &player);
+        // Start drawing to the render texture
+        rt.begin();
         {
-            {
-                rt.begin();
-                world.start_3d();
-                rl.clearBackground(rl.Color.white);
-                rl.drawGrid(10, 1);
-                player.draw();
-                world.end_3d();
-                rt.end();
-            }
-
-            rl.beginDrawing();
-            rl.drawTexturePro(rt.texture, .{
-                .x = 0,
-                .y = 0,
-                .width = RENDER_WIDTH,
-                .height = -RENDER_HEIGHT,
-            }, .{
-                .x = 0,
-                .y = 0,
-                .width = @floatFromInt(WINDOW_WIDTH),
-                .height = @floatFromInt(WINDOW_HEIGHT),
-            }, rl.Vector2.zero(), 0, rl.Color.white);
-            rl.endDrawing();
+            world.start_3d();
+            rl.clearBackground(rl.Color.white);
+            rl.drawGrid(10, 1);
+            player.draw();
+            world.end_3d();
         }
+        rt.end();
+
+        //Draw our render texture to the screen
+        rl.beginDrawing();
+        rl.drawTexturePro(rt.texture, .{
+            .x = 0,
+            .y = 0,
+            .width = RENDER_WIDTH,
+            //set a negative height to flip the texture vertically
+            .height = -RENDER_HEIGHT,
+        }, .{
+            .x = 0,
+            .y = 0,
+            .width = @floatFromInt(WINDOW_WIDTH),
+            .height = @floatFromInt(WINDOW_HEIGHT),
+        }, rl.Vector2.zero(), 0, rl.Color.white);
+        rl.endDrawing();
     }
 }
 
