@@ -2,12 +2,29 @@ const std = @import("std");
 const rl = @import("raylib");
 const Player = @import("player.zig").Player;
 const World = @import("core.zig").World;
+const Renderer = @import("rendering.zig").Renderer;
+const Block = @import("environment.zig").Block;
 
 pub fn main() !void {
     var WINDOW_WIDTH: i32 = 1600;
     var WINDOW_HEIGHT: i32 = 900;
     const RENDER_WIDTH: i32 = 480;
     const RENDER_HEIGHT: i32 = 320;
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    const allocator = gpa.allocator();
+
+    var player = Player.init(.{ .x = 0, .y = 2, .z = 0 });
+    var renderer = Renderer.init(allocator);
+
+    var a = Block.new(2, 2, 4);
+    var b = Block.new(-2, 2, -4);
+    var c = Block.new(3, 2, 5);
+
+    try renderer.append(player.draw_object());
+    try renderer.append(a.draw_object());
+    try renderer.append(b.draw_object());
+    try renderer.append(c.draw_object());
 
     rl.setConfigFlags(.{ .window_resizable = true });
 
@@ -19,8 +36,6 @@ pub fn main() !void {
 
     const world = World.init();
 
-    var player = Player.init(.{ .x = 0, .y = 2, .z = 0 });
-
     var rt = try rl.loadRenderTexture(RENDER_WIDTH, RENDER_HEIGHT);
 
     while (!rl.windowShouldClose()) {
@@ -31,7 +46,7 @@ pub fn main() !void {
             world.start_3d();
             rl.clearBackground(rl.Color.white);
             rl.drawGrid(10, 1);
-            player.draw();
+            renderer.draw();
             world.end_3d();
         }
         rt.end();
