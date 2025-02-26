@@ -14,8 +14,13 @@ pub const PhysicsObject = struct {
     }
 };
 
+pub const ColliderTag = enum { cube, sphere };
+
+pub const Collider = union(ColliderTag) { cube: rl.Vector3, sphere: f32 };
+
 pub const Rigidbody = struct {
     position: rl.Vector3,
+    collider: Collider,
     velocity: rl.Vector3 = .{ .x = 0, .y = 0, .z = 0 },
 
     const Self = @This();
@@ -23,6 +28,34 @@ pub const Rigidbody = struct {
     pub fn physics_update(ptr: *anyopaque) void {
         const self: *Rigidbody = @ptrCast(@alignCast(ptr));
         _ = self;
+    }
+
+    pub fn colliding_with(self: Self, other: Self) bool {
+        switch (self.collider) {
+            .cube => |extents| {
+                const self_box = rl.BoundingBox{ .min = self.position.subtract(extents.scale(0.5)), .max = self.position.add(extents.scale(0.5)) };
+                switch (other.collider) {
+                    .cube => |o_extents| {
+                        const other_box = rl.BoundingBox{ .min = other.position.subtract(o_extents.scale(0.5)), .max = other.position.add(o_extents.scale(0.5)) };
+                        return rl.checkCollisionBoxes(self_box, other_box);
+                    },
+                    .sphere => |o_radius| {
+                        return rl.checkCollisionBoxSphere(self_box, other.position, o_radius);
+                    },
+                }
+            },
+            .sphere => |radius| {
+                switch (other.collider) {
+                    .cube => |o_extents| {
+                        const other_box = rl.BoundingBox{ .min = other.position.subtract(o_extents.scale(0.5)), .max = other.position.add(o_extents.scale(0.5)) };
+                        return rl.checkCollisionBoxSphere(other_box, self.position, radius);
+                    },
+                    .sphere => |o_radius| {
+                        return rl.checkCollisionSpheres(self.position, radius, other.position, o_radius);
+                    },
+                }
+            },
+        }
     }
 
     pub fn physics_object(self: *Self) PhysicsObject {
