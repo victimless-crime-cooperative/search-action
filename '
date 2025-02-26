@@ -6,8 +6,8 @@ const World = @import("core.zig").World;
 pub fn main() !void {
     var WINDOW_WIDTH: i32 = 1600;
     var WINDOW_HEIGHT: i32 = 900;
-    const RENDER_WIDTH: i32 = 480;
-    const RENDER_HEIGHT: i32 = 320;
+    const RENDER_WIDTH: i32 = 240;
+    const RENDER_HEIGHT: i32 = 160;
 
     rl.setConfigFlags(.{ .window_resizable = true });
 
@@ -22,26 +22,31 @@ pub fn main() !void {
     var player = Player.init(.{ .x = 0, .y = 2, .z = 0 });
 
     var rt = try rl.loadRenderTexture(RENDER_WIDTH, RENDER_HEIGHT);
+    var scene = try rl.loadRenderTexture(RENDER_WIDTH, RENDER_HEIGHT);
 
     while (!rl.windowShouldClose()) {
-        input(world, &player);
+        input(world, player);
+        world.start_3d();
+        defer world.end_3d();
         {
             {
-                rt.begin();
-                world.start_3d();
+                scene.begin();
                 rl.clearBackground(rl.Color.white);
                 rl.drawGrid(10, 1);
                 player.draw();
-                world.end_3d();
-                rt.end();
+                scene.end();
             }
+
+            rt.begin();
+            scene.texture.draw(0, 0, rl.Color.white);
+            rt.end();
 
             rl.beginDrawing();
             rl.drawTexturePro(rt.texture, .{
                 .x = 0,
                 .y = 0,
                 .width = RENDER_WIDTH,
-                .height = -RENDER_HEIGHT,
+                .height = RENDER_HEIGHT,
             }, .{
                 .x = 0,
                 .y = 0,
@@ -53,7 +58,7 @@ pub fn main() !void {
     }
 }
 
-pub fn input(world: World, player: *Player) void {
+pub fn input(world: World, player: *Player) rl.Vector2 {
     var velocity = rl.Vector3.zero();
     if (rl.isKeyDown(.s)) {
         velocity.z += 1;
