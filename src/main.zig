@@ -29,10 +29,10 @@ pub fn main() !void {
     try renderer.append(allocator, b.renderable());
     try renderer.append(allocator, c.renderable());
     // Register our rigidbodies
-    try solver.append(allocator, player.rigidbody());
-    try solver.append(allocator, a.rigidbody());
-    try solver.append(allocator, b.rigidbody());
-    try solver.append(allocator, c.rigidbody());
+    try solver.put(allocator, .{ .index = 0 }, player.rigidbody());
+    try solver.put(allocator, .{ .index = 1 }, a.rigidbody());
+    try solver.put(allocator, .{ .index = 2 }, b.rigidbody());
+    try solver.put(allocator, .{ .index = 3 }, c.rigidbody());
 
     rl.setConfigFlags(.{ .window_resizable = true });
 
@@ -42,7 +42,9 @@ pub fn main() !void {
     WINDOW_HEIGHT = rl.getMonitorHeight(monitor);
     defer rl.closeWindow();
 
-    const world = World.init();
+    var world = World.init();
+    const player_id = try world.insert(allocator, Player, &player);
+    _ = player_id;
 
     var rt = try rl.loadRenderTexture(RENDER_WIDTH, RENDER_HEIGHT);
 

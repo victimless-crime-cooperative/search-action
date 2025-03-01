@@ -1,23 +1,51 @@
 const std = @import("std");
 const rl = @import("raylib");
+const e = @import("entity.zig");
 
 pub const PhysicsSolver = struct {
-    rigidbodies: std.ArrayListUnmanaged(Rigidbody),
+    rigidbodies: std.ArrayHashMapUnmanaged(e.Entity, Rigidbody, e.EntityContext, false),
 
     const Self = @This();
 
     pub fn init() Self {
-        const rigidbodies: std.ArrayListUnmanaged(Rigidbody) = .{};
+        const rigidbodies: std.ArrayHashMapUnmanaged(e.Entity, Rigidbody, e.EntityContext, false) = .{};
         return Self{ .rigidbodies = rigidbodies };
     }
 
-    pub fn deinit(self: Self) void {
-        self.rigidbodies.deinit();
+    pub fn deinit(self: Self, allocator: std.mem.Allocator) void {
+        self.rigidbodies.deinit(allocator);
     }
 
-    pub fn append(self: *Self, allocator: std.mem.Allocator, rigidbody: Rigidbody) !void {
-        try self.rigidbodies.append(allocator, rigidbody);
+    pub fn put(self: *Self, allocator: std.mem.Allocator, entity: e.Entity, rigidbody: Rigidbody) !void {
+        try self.rigidbodies.put(allocator, entity, rigidbody);
     }
+
+    pub fn check_collisions(self: Self, allocator: std.mem.Allocator) ![]CollisionPair {
+        const collisions_list: std.ArrayListUnmanaged(CollisionPair) = .{};
+        const it1 = self.rigidbodies.iterator();
+        const it2 = self.rigidbodies.iterator();
+        for (it1) |a| {
+            for (it2) |b| {
+                if (a.key != b.key) {
+                    if (a.value.colliding_with(b.value)) {
+                        try collisions_list.append(allocator, .{
+                            .a = a.key,
+                            .b = b.key,
+                        });
+                    }
+                }
+            }
+        }
+
+        return collisions_list.toOwnedSlice(allocator);
+    }
+};
+
+pub const CollisionPair = struct {
+    a: e.Entity,
+    b: e.Entity,
+
+    const Self = @This();
 };
 
 pub const Rigidbody = struct {

@@ -1,3 +1,5 @@
+const std = @import("std");
+
 pub const Entity = struct {
     index: u32,
 
@@ -5,6 +7,22 @@ pub const Entity = struct {
 
     pub fn eql(self: Self, other: Self) bool {
         return self.index == other.index;
+    }
+};
+
+pub const EntityContext = struct {
+    const Self = @This();
+
+    pub fn hash(self: Self, entity: Entity) u32 {
+        _ = self;
+        return entity.index;
+    }
+
+    pub fn eql(self: Self, a: Entity, b: Entity, i: usize) bool {
+        _ = self;
+        _ = i;
+
+        return a.eql(b);
     }
 };
 
