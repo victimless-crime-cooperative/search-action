@@ -3,6 +3,7 @@ const rl = @import("raylib");
 const Player = @import("player.zig").Player;
 const World = @import("core.zig").World;
 const Renderer = @import("rendering.zig").Renderer;
+const PhysicsSolver = @import("physics.zig").PhysicsSolver;
 const Block = @import("environment.zig").Block;
 
 pub fn main() !void {
@@ -15,16 +16,23 @@ pub fn main() !void {
     const allocator = gpa.allocator();
 
     var player = Player.init(.{ .x = 0, .y = 2, .z = 0 });
-    var renderer = Renderer.init(allocator);
+    var renderer = Renderer.init();
+    var solver = PhysicsSolver.init();
 
     var a = Block.new(2, 2, 4);
     var b = Block.new(-2, 2, -4);
     var c = Block.new(3, 2, 5);
 
-    try renderer.append(player.draw_object());
-    try renderer.append(a.draw_object());
-    try renderer.append(b.draw_object());
-    try renderer.append(c.draw_object());
+    // Register our renderables
+    try renderer.append(allocator, player.renderable());
+    try renderer.append(allocator, a.renderable());
+    try renderer.append(allocator, b.renderable());
+    try renderer.append(allocator, c.renderable());
+    // Register our rigidbodies
+    try solver.append(allocator, player.rigidbody());
+    try solver.append(allocator, a.rigidbody());
+    try solver.append(allocator, b.rigidbody());
+    try solver.append(allocator, c.rigidbody());
 
     rl.setConfigFlags(.{ .window_resizable = true });
 

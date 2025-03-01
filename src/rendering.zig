@@ -27,12 +27,12 @@ pub const ModelHandles = struct {
 };
 
 pub const Renderer = struct {
-    renderable_objects: std.ArrayList(Renderable),
+    renderable_objects: std.ArrayListUnmanaged(Renderable),
 
     const Self = @This();
 
-    pub fn init(allocator: std.mem.Allocator) Self {
-        const renderable_objects = std.ArrayList(Renderable).init(allocator);
+    pub fn init() Self {
+        const renderable_objects: std.ArrayListUnmanaged(Renderable) = .{};
         return Self{ .renderable_objects = renderable_objects };
     }
 
@@ -40,8 +40,8 @@ pub const Renderer = struct {
         self.renderable_objects.deinit();
     }
 
-    pub fn append(self: *Self, draw_object: Renderable) !void {
-        try self.renderable_objects.append(draw_object);
+    pub fn append(self: *Self, allocator: std.mem.Allocator, draw_object: Renderable) !void {
+        try self.renderable_objects.append(allocator, draw_object);
     }
 
     pub fn draw(self: Self) void {

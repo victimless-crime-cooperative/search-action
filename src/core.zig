@@ -1,14 +1,20 @@
 const std = @import("std");
 const rl = @import("raylib");
+const entity = @import("entity.zig");
 
 pub const World = struct {
     camera: rl.Camera3D,
+    entity_generator: entity.EntityGenerator = .{},
 
     const Self = @This();
 
     pub fn init() Self {
         const camera = rl.Camera3D{ .position = .{ .x = 0, .y = 10, .z = -10 }, .target = .{ .x = 0, .y = 0, .z = 0 }, .up = .{ .x = 0, .y = 1, .z = 0 }, .fovy = 45, .projection = .perspective };
         return .{ .camera = camera };
+    }
+
+    pub fn create(self: *Self) entity.Entity {
+        return self.entity_generator.create();
     }
 
     pub fn interpolate_vector(self: Self, value: rl.Vector3) rl.Vector3 {
