@@ -19,7 +19,7 @@ pub const Player = struct {
     }
 
     pub fn move(self: *Self, velocity: rl.Vector3) void {
-        self.position = self.position.add(velocity.scale(rl.getFrameTime()));
+        self.velocity = velocity.scale(rl.getFrameTime());
     }
 
     pub fn renderable(self: *Self) ren.Renderable {

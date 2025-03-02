@@ -49,7 +49,11 @@ pub fn main() !void {
     var rt = try rl.loadRenderTexture(RENDER_WIDTH, RENDER_HEIGHT);
 
     while (!rl.windowShouldClose()) {
-        input(world, &player);
+        // Physics Step
+        {
+            input(world, &player);
+            solver.apply_velocity();
+        }
         // Start drawing to the render texture
         rt.begin();
         {
@@ -96,5 +100,7 @@ pub fn input(world: World, player: *Player) void {
     if (velocity.x != 0 or velocity.z != 0) {
         const transformed_velocity = world.interpolate_vector(velocity);
         player.move(transformed_velocity);
+    } else {
+        player.move(rl.Vector3.zero());
     }
 }

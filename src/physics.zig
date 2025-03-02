@@ -20,6 +20,13 @@ pub const PhysicsSolver = struct {
         try self.rigidbodies.put(allocator, entity, rigidbody);
     }
 
+    pub fn apply_velocity(self: *Self) void {
+        var iterator = self.rigidbodies.iterator();
+        while (iterator.next()) |entry| {
+            entry.value_ptr.apply_velocity();
+        }
+    }
+
     pub fn check_collisions(self: Self, allocator: std.mem.Allocator) ![]CollisionPair {
         const collisions_list: std.ArrayListUnmanaged(CollisionPair) = .{};
         const it1 = self.rigidbodies.iterator();
@@ -48,6 +55,10 @@ pub const CollisionPair = struct {
     const Self = @This();
 };
 
+pub fn vec3_is_any(value: *rl.Vector3) bool {
+    return !(value.x == 0 and value.y == 0 and value.z == 0);
+}
+
 pub const Rigidbody = struct {
     ptr: *anyopaque,
     position: *rl.Vector3,
@@ -56,9 +67,10 @@ pub const Rigidbody = struct {
 
     const Self = @This();
 
-    pub fn physics_update(ptr: *anyopaque) void {
-        const self: *Rigidbody = @ptrCast(@alignCast(ptr));
-        _ = self;
+    pub fn apply_velocity(self: *Self) void {
+        if (vec3_is_any(self.velocity)) {
+            self.position.* = self.position.add(self.velocity.*);
+        }
     }
 
     pub fn colliding_with(self: Self, other: Self) bool {
