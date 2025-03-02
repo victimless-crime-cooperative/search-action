@@ -16,26 +16,25 @@ pub fn main() !void {
     const allocator = gpa.allocator();
 
     var player = Player.init(.{ .x = 0, .y = 2, .z = 0 });
-    var renderer = Renderer.init();
-    var solver = PhysicsSolver.init();
+    // var renderer = Renderer.init();
+    // var solver = PhysicsSolver.init();
 
     var a = Block.new(2, 2, 4);
     var b = Block.new(-2, 2, -4);
     var c = Block.new(3, 2, 5);
 
     // Register our renderables
-    try renderer.append(allocator, player.renderable());
-    try renderer.append(allocator, a.renderable());
-    try renderer.append(allocator, b.renderable());
-    try renderer.append(allocator, c.renderable());
-    // Register our rigidbodies
-    try solver.put(allocator, .{ .index = 0 }, player.rigidbody());
-    try solver.put(allocator, .{ .index = 1 }, a.rigidbody());
-    try solver.put(allocator, .{ .index = 2 }, b.rigidbody());
-    try solver.put(allocator, .{ .index = 3 }, c.rigidbody());
+    // try renderer.put(allocator, .{ .index = 0 }, player.renderable());
+    // try renderer.put(allocator, .{ .index = 1 }, a.renderable());
+    // try renderer.put(allocator, .{ .index = 2 }, b.renderable());
+    // try renderer.put(allocator, .{ .index = 3 }, c.renderable());
+    // // Register our rigidbodies
+    // try solver.put(allocator, .{ .index = 0 }, player.rigidbody());
+    // try solver.put(allocator, .{ .index = 1 }, a.rigidbody());
+    // try solver.put(allocator, .{ .index = 2 }, b.rigidbody());
+    // try solver.put(allocator, .{ .index = 3 }, c.rigidbody());
 
     rl.setConfigFlags(.{ .window_resizable = true });
-
     rl.initWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "search action");
     const monitor = rl.getCurrentMonitor();
     WINDOW_WIDTH = rl.getMonitorWidth(monitor);
@@ -46,13 +45,19 @@ pub fn main() !void {
     const player_id = try world.insert(allocator, Player, &player);
     _ = player_id;
 
+    const a_id = try world.insert(allocator, Block, &a);
+    _ = a_id;
+    const b_id = try world.insert(allocator, Block, &b);
+    _ = b_id;
+    const c_id = try world.insert(allocator, Block, &c);
+    _ = c_id;
+
     var rt = try rl.loadRenderTexture(RENDER_WIDTH, RENDER_HEIGHT);
 
     while (!rl.windowShouldClose()) {
-        // Physics Step
         {
             input(world, &player);
-            solver.apply_velocity();
+            world.physics_step();
         }
         // Start drawing to the render texture
         rt.begin();
@@ -60,7 +65,8 @@ pub fn main() !void {
             world.start_3d();
             rl.clearBackground(rl.Color.white);
             rl.drawGrid(10, 1);
-            renderer.draw();
+            // renderer.draw();
+            world.draw_step();
             world.end_3d();
         }
         rt.end();

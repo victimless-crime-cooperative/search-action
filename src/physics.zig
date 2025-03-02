@@ -20,7 +20,7 @@ pub const PhysicsSolver = struct {
         try self.rigidbodies.put(allocator, entity, rigidbody);
     }
 
-    pub fn apply_velocity(self: *Self) void {
+    pub fn apply_velocity(self: Self) void {
         var iterator = self.rigidbodies.iterator();
         while (iterator.next()) |entry| {
             entry.value_ptr.apply_velocity();

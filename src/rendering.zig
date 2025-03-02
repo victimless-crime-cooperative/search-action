@@ -1,5 +1,6 @@
 const std = @import("std");
 const rl = @import("raylib");
+const e = @import("entity.zig");
 
 pub const ModelHandles = struct {
     player: *rl.Model,
@@ -27,26 +28,27 @@ pub const ModelHandles = struct {
 };
 
 pub const Renderer = struct {
-    renderable_objects: std.ArrayListUnmanaged(Renderable),
+    renderables: std.ArrayHashMapUnmanaged(e.Entity, Renderable, e.EntityContext, false),
 
     const Self = @This();
 
     pub fn init() Self {
-        const renderable_objects: std.ArrayListUnmanaged(Renderable) = .{};
-        return Self{ .renderable_objects = renderable_objects };
+        const renderables: std.ArrayHashMapUnmanaged(e.Entity, Renderable, e.EntityContext, false) = .{};
+        return Self{ .renderables = renderables };
     }
 
-    pub fn deinit(self: Self) void {
-        self.renderable_objects.deinit();
+    pub fn deinit(self: Self, allocator: std.mem.Allocator) void {
+        self.renderables.deinit(allocator);
     }
 
-    pub fn append(self: *Self, allocator: std.mem.Allocator, draw_object: Renderable) !void {
-        try self.renderable_objects.append(allocator, draw_object);
+    pub fn put(self: *Self, allocator: std.mem.Allocator, entity: e.Entity, renderable: Renderable) !void {
+        try self.renderables.put(allocator, entity, renderable);
     }
 
     pub fn draw(self: Self) void {
-        for (self.renderable_objects.items) |ro| {
-            ro.draw();
+        var iterator = self.renderables.iterator();
+        while (iterator.next()) |entry| {
+            entry.value_ptr.draw();
         }
     }
 };

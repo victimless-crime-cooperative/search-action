@@ -21,9 +21,15 @@ pub const World = struct {
 
     pub fn insert(self: *Self, allocator: std.mem.Allocator, comptime T: type, object: *T) !entity.Entity {
         const new_id = self.entity_generator.create();
+        // For each struct implementing the rigidbody interface, add it's rigidbody to the solver
         if (@hasDecl(T, "rigidbody")) {
-            std.debug.print("Found physical guy, adding to world", .{});
+            std.debug.print("////\nStruct with a rigidbody found,\n adding to world\n////\n", .{});
             try self.physics_solver.put(allocator, new_id, object.rigidbody());
+        }
+        // For each struct implementing the renderable interface, add it's renderable to the solver
+        if (@hasDecl(T, "renderable")) {
+            std.debug.print("////\nStruct with a renderable found,\nadding to world\n////\n", .{});
+            try self.renderer.put(allocator, new_id, object.renderable());
         }
 
         return new_id;
@@ -46,5 +52,13 @@ pub const World = struct {
     }
     pub fn end_3d(self: Self) void {
         self.camera.end();
+    }
+
+    pub fn physics_step(self: Self) void {
+        self.physics_solver.apply_velocity();
+    }
+
+    pub fn draw_step(self: Self) void {
+        self.renderer.draw();
     }
 };
