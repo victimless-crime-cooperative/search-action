@@ -12,7 +12,8 @@ pub const PhysicsSolver = struct {
         return Self{ .rigidbodies = rigidbodies };
     }
 
-    pub fn deinit(self: Self, allocator: std.mem.Allocator) void {
+    /// De-initialize the physics solver
+    pub fn deinit(self: *Self, allocator: std.mem.Allocator) void {
         self.rigidbodies.deinit(allocator);
     }
 

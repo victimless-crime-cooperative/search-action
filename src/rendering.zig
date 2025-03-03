@@ -37,7 +37,7 @@ pub const Renderer = struct {
         return Self{ .renderables = renderables };
     }
 
-    pub fn deinit(self: Self, allocator: std.mem.Allocator) void {
+    pub fn deinit(self: *Self, allocator: std.mem.Allocator) void {
         self.renderables.deinit(allocator);
     }
 

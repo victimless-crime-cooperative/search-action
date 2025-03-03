@@ -26,7 +26,7 @@ pub const World = struct {
             std.debug.print("////\nStruct with a rigidbody found,\n adding to world\n////\n", .{});
             try self.physics_solver.put(allocator, new_id, object.rigidbody());
         }
-        // For each struct implementing the renderable interface, add it's renderable to the solver
+        // For each struct implementing the renderable interface, add it's renderable to the renderer
         if (@hasDecl(T, "renderable")) {
             std.debug.print("////\nStruct with a renderable found,\nadding to world\n////\n", .{});
             try self.renderer.put(allocator, new_id, object.renderable());
@@ -43,8 +43,9 @@ pub const World = struct {
         return new_value.normalize();
     }
 
-    pub fn deinit(self: Self, allocator: std.mem.Allocator) void {
-        allocator.destroy(self.camera);
+    pub fn deinit(self: *Self, allocator: std.mem.Allocator) void {
+        self.physics_solver.deinit(allocator);
+        self.renderer.deinit(allocator);
     }
 
     pub fn start_3d(self: Self) void {

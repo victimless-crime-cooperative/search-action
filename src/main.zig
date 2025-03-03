@@ -29,6 +29,8 @@ pub fn main() !void {
     defer rl.closeWindow();
 
     var world = World.init();
+    defer world.deinit(allocator);
+
     const player_id = try world.insert(allocator, Player, &player);
     _ = player_id;
 
