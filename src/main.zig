@@ -16,23 +16,10 @@ pub fn main() !void {
     const allocator = gpa.allocator();
 
     var player = Player.init(.{ .x = 0, .y = 2, .z = 0 });
-    // var renderer = Renderer.init();
-    // var solver = PhysicsSolver.init();
 
     var a = Block.new(2, 2, 4);
     var b = Block.new(-2, 2, -4);
     var c = Block.new(3, 2, 5);
-
-    // Register our renderables
-    // try renderer.put(allocator, .{ .index = 0 }, player.renderable());
-    // try renderer.put(allocator, .{ .index = 1 }, a.renderable());
-    // try renderer.put(allocator, .{ .index = 2 }, b.renderable());
-    // try renderer.put(allocator, .{ .index = 3 }, c.renderable());
-    // // Register our rigidbodies
-    // try solver.put(allocator, .{ .index = 0 }, player.rigidbody());
-    // try solver.put(allocator, .{ .index = 1 }, a.rigidbody());
-    // try solver.put(allocator, .{ .index = 2 }, b.rigidbody());
-    // try solver.put(allocator, .{ .index = 3 }, c.rigidbody());
 
     rl.setConfigFlags(.{ .window_resizable = true });
     rl.initWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "search action");

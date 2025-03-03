@@ -61,4 +61,8 @@ pub const World = struct {
     pub fn draw_step(self: Self) void {
         self.renderer.draw();
     }
+
+    pub fn game_loop(self: Self) void {
+        self.physics_step();
+    }
 };
