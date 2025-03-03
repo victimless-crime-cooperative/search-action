@@ -55,7 +55,9 @@ pub const World = struct {
         self.camera.end();
     }
 
-    pub fn physics_step(self: Self) void {
+    pub fn physics_step(self: *Self, allocator: std.mem.Allocator) !void {
+        try self.physics_solver.refresh_collisions(allocator);
+        self.physics_solver.manage_collision_flags();
         self.physics_solver.apply_velocity();
     }
 

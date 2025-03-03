@@ -46,7 +46,7 @@ pub fn main() !void {
     while (!rl.windowShouldClose()) {
         {
             input(world, &player);
-            world.physics_step();
+            try world.physics_step(allocator);
         }
         // Start drawing to the render texture
         rt.begin();
