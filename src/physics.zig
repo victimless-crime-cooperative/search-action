@@ -4,7 +4,7 @@ const e = @import("entity.zig");
 
 pub const PhysicsSolver = struct {
     rigidbodies: std.ArrayHashMapUnmanaged(e.Entity, Rigidbody, e.EntityContext, false),
-    collision_pairs: ?[]CollisionPair = null,
+    collision_pairs: ?[]Rigidbody.CollisionPair = null,
 
     const Self = @This();
 
@@ -45,7 +45,7 @@ pub const PhysicsSolver = struct {
     }
 
     pub fn refresh_collisions(self: *Self, allocator: std.mem.Allocator) !void {
-        var collisions_list: std.ArrayListUnmanaged(CollisionPair) = .{};
+        var collisions_list: std.ArrayListUnmanaged(Rigidbody.CollisionPair) = .{};
         var it1 = self.rigidbodies.iterator();
         var it2 = self.rigidbodies.iterator();
         while (it1.next()) |*a| {
@@ -72,17 +72,6 @@ pub const PhysicsSolver = struct {
     }
 };
 
-pub const CollisionPair = struct {
-    a: e.Entity,
-    b: e.Entity,
-
-    const Self = @This();
-
-    pub fn contains(self: Self, entity: e.Entity) bool {
-        return self.a.eql(entity) or self.b.eql(entity);
-    }
-};
-
 pub fn vec3_is_any(value: *rl.Vector3) bool {
     return !(value.x == 0 and value.y == 0 and value.z == 0);
 }
@@ -94,10 +83,28 @@ pub const Rigidbody = struct {
     collider: Collider,
     collisionFn: *const fn (ptr: *anyopaque, is_colliding: bool) void,
 
+    pub const ColliderTag = enum { cube, sphere };
+
+    pub const Collider = union(ColliderTag) { cube: rl.Vector3, sphere: f32 };
+    pub const CollisionStatus = packed struct { current: bool, potential: bool, _padding: u6 = 0 };
+
+    pub const CollisionPair = struct {
+        a: e.Entity,
+        b: e.Entity,
+
+        pub fn contains(self: CollisionPair, entity: e.Entity) bool {
+            return self.a.eql(entity) or self.b.eql(entity);
+        }
+    };
+
     const Self = @This();
 
     pub fn set_colliding(self: *Self, is_colliding: bool) void {
         return self.collisionFn(self.ptr, is_colliding);
+    }
+
+    pub fn projected_position(self: Self) rl.Vector3 {
+        return self.position.*.add(self.velocity.*);
     }
 
     pub fn apply_velocity(self: *Self) void {
@@ -110,6 +117,7 @@ pub const Rigidbody = struct {
         return self.collisionFn(self.ptr, is_colliding);
     }
 
+    //Todo, make this report collisions as well as potential collisions
     pub fn colliding_with(self: Self, other: Self) bool {
         switch (self.collider) {
             .cube => |extents| {
@@ -139,6 +147,13 @@ pub const Rigidbody = struct {
     }
 };
 
-pub const ColliderTag = enum { cube, sphere };
+test "collision type packing" {
+    try std.testing.expect(@sizeOf(Rigidbody.CollisionStatus) == 1);
+}
+test "newtypes" {
+    const SuperInt = u32;
+    const a: SuperInt = 4;
+    const b: u32 = 4;
 
-pub const Collider = union(ColliderTag) { cube: rl.Vector3, sphere: f32 };
+    try std.testing.expect(a == b);
+}
